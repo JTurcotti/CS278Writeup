@@ -1,8 +1,21 @@
 \documentclass{article}
+\usepackage{scribe}
 
 \title{Final Writeup - The Unique Games Conjecture}
 \author{Robert Wang and Joshua Turcotti}
 
 \begin{document}
 \maketitle
+\section*{Examples of Reductions for CSP problems}
+In this section, we present two specific examples of proofs showing the UGC implies a particular hardness result for CSPs. The general framework of the reduction is as follows: Suppose we want to show that $UGC$ implies it is NP-hard to solve the $(1-\alpha, c+\gamma)$ version of a particular $CSP$ problem. for any $\alpha, \gamma > 0$ (i.e. $c$ is the best constant approximation factor).: Start with arbitrary instance of Unique Label Cover, $\mathcal{I}$. Use it to construct a PCP verifier for the $CSP$ problem such that:
+\begin{enumerate}[1)]
+            \item if $OPT(\mathcal{I}) > 1-\epsilon$, then $P[Accept] \geq 1-\alpha(\epsilon)$
+            \item if $OPT(\mathcal{I}) \leq \delta$, then $P[Accept] \leq c(\delta)$
+\end{enumerate}
+Where $\alpha(\epsilon), c+\gamma(\delta)\rightarrow 0$ as $\epsilon,\delta\rightarrow 0$. Then, use the PCP verifier to construct an instance, $\mathcal{I}'$ of the $CSP$ such that $OPT(\mathcal{I}') = P[Accept]$. Then solving the $(1-\alpha, c+\gamma)$ gap version of the CSP problem implies solving the $(1-\epsilon, \delta)$ version of the original Unique label cover problem, which, by the $UGC$ is $NP-$hard.
+\subsection*{Max-3-Lin:}
+The problem $Max-3-Lin$ is as follows. Given a set of constraints of the form $x_i + x_j + x_j = c \mod 2$, we want to find an assignment to the variables $x_i$ that satisfies the most number of constraints. Note that if we apply the transformation $x\mapsto (-1)^x$, the constraints take the form of $y_iy_jy_k = d$ for $y_i,y_j,y_k,d\in \{-1,1\}$. We will use the product convention as it makes the Fourier Analysis much easier.
+\begin{theorem}
+If the UGC is true, then the $()$
+\end{theorem}
 \end{document}
