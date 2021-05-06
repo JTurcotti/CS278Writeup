@@ -3,6 +3,101 @@
 \title{Final Writeup - The Unique Games Conjecture}
 \author{Robert Wang and Joshua Turcotti}
 
+\usepackage{amsmath,amsthm,textcomp,amssymb,geometry,graphicx,enumerate}
+
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{theorem}{Theroem}
+
+\newcommand{\NP}{\ensuremath{\mathbf{NP}}}
+\newcommand{\PCP}{\ensuremath{\mathbf{PCP}}}
+\newcommand{\APX}{\ensuremath{\mathbf{APX}}}
+\newcommand{\X}{\mathcal{X}}
+\newcommand{\Y}{\mathcal{Y}}
+\newcommand{\C}{\ensuremath{\mathcal{C}}}
+\renewcommand{\a}{\alpha}
+\renewcommand{\b}{\beta}
+\newcommand{\g}{\gamma}
+\renewcommand{\d}{\delta}
+\newcommand{\e}{\epsilon}
+\newcommand{\I}{\mathcal{I}}
+\newcommand{\Ind}{\mathbb{I}}
+\renewcommand{\L}{\ensuremath{\mathcal{L}}}
+\newcommand{\OPT}{\ensuremath{\mathit{OPT}}}
+
 \begin{document}
 \maketitle
+\section{Introduction}
+
+This writeup will present our reading and investigations into the Unique Games Conjecture - a robust step in proving innapproximability of certain hard problems. We will formulate it in terms of 2 models - 2 Prover 1 Round Games and Label Cover instances, and justify its usefulness as claimed.
+
+\section{2 Prover 1 Round Games}
+
+
+In order to reason about reductions from known \NP-Hard problems, we define a class of them in particular, called \textit{2 Prover 1 Round Games} involving a Verifier and 2 Provers. An instance $\I$ of a 2P1R game is defined as follows.
+\begin{enumerate}
+\item The Verifier asks questions $(X, Y)$, drawn from some distributions $(\X, \Y)$
+\item The first Prover receives question $X$ and responds with a proof $\alpha$ from a set $A$, likewise Prover $B$ responds with proof $\beta$ from $B$
+\item The Verifier accepts based on some predicate $V(X, Y, \alpha, \beta)$.
+\item The value of the game is the probability over $\X, \Y$ that the Verifier accepts given maximal strategies by the Provers.
+\end{enumerate}
+A 2 Prover 1 Round Game is called \textit{unique} if $A = B$ and the predicate $V$ consists of bijections $\pi_{XY}: A \to B$ for each possible $X, Y$ that must be satisfied by the chosen labels $\a, \b$.
+
+
+
+A 2 Prover 1 Round instance $\I$ can be repeated in parallel $n$ times to yield the instance $\I^n$, in which $n$ independent queries $X, Y$ are generated and sent to $n$ non-communicating pairs of Provers. The value of $\I^n$ is the maximum probability that the the Verifier accepts in all $n$ branches. This allows us to formulate the key result \textit{Raz's Parallel Repetition Theorem}:
+\begin{theorem}[Raz's Parallel Repetition]
+  If $\I$ is a 2P1R instance with value $1 - \e$, then there is a universal constant $\g > 0$ such that the value of $\I^n$ is at most $(1 - \e)^{\g \e^2 n/c}$, where $c$ is a bound on the length of the Prover's answers in $\I$.
+\end{theorem}
+
+
+\section{Label Cover Instances}
+
+We now provide a slight specification of the 2 Prover 1 Round model called the \textit{Label Cover} problem. An instance \L of the Label Cover problem consists of:
+\begin{itemize}
+\item A complete bipartite graph $G(V, W)$ with bipartition $V, W$
+\item A weight $p_{vw}$ assigned to every edge with $\sum_{v, w}p_{vw} = 1$
+\item Label sets $N, M$ for vertices in $V, W$ respectively.
+\item Projection functions $\pi_{vw} : M \to N$ for every edge $(v, w)$ in $G$
+\end{itemize}
+An assignment to this CSP consists of choosing label functions $L_V: V \to N$ and $L_W: W \to M$, yielding the following definition:
+\[OPT(\L) := \max_{L_V, L_W} \sum_{(v, w) \in G}p_{vw}\cdot\Ind\{\pi_{vw}(L_W(w)) = L_V(v)\}\]
+A Label Cover instance $\L$ is called \textit{unique} if $M = N$ and every function $\pi_{vw}$ is a bijection.
+
+
+Since Label Cover is a CSP, we can apply the PCP theorem to any label cover problem to obtain the \NP-Hardness of a $(\rho, 1)$ Gap version of some instance $\L$ of that problem, for some $\rho$. Since Label Cover is equivalent to a 2 Prover 1 Round game in which the Verifier asks questions from $V, W$ with joint probabilities $p_{vw}$, the provers respond with answers $L_V(v)$ and $L_W(w)$, and the Verifier accepts if the projection functions $\pi_{vw}$ are satisfied, we can apply Raz's Parallel Repetition Theorem to strengthen the Gap to an arbitrarily chosen $\rho$, noting that Label cover just as easy simulates parallel repetition of a 2P1R instance as the original.
+\begin{theorem}
+  For every constant $\e > 0$, there exists a constant $k = k(\e)$ such that it is \NP-Hard to determine whether a Label Cover instance $\L$ with answers from sets of size at most $k$ (i.e. $|M|, |N| \le k$) has $\OPT(\L) = 1$ or $\OPT(\L) \le \e$.
+\end{theorem}
+
+\section{Introducing the Unique Games Conjecture}
+
+
+
+
+The preceeding theorem, $\NP$-Hardness of the $(\e, 1)$ Gap version of Label Cover for arbitrary $\e > 0$ is powerful as the source of reductions to other Gap problems that we wish to show are $\NP$-Hard. However, the requirement of \textit{Perfect Completeness}, i.e. acceptance only if $\OPT(\L) = 1$ is too strong for many desired reductions, so at the cost of restriction to \textit{unique} instances of Label Cover, which can be seen to be equivalent to \textit{unique} instance of 2P1R games, we can relax to imperfect completeness and obtain the following conjecture:
+\begin{conjecture}[Unique Games Conjecture]
+  For arbitrarily small constants $\e, \d > 0$, there exists a constant $k = k(\e, \d)$ such that it is \NP-Hard to determine whether a unique Label Cover instance $\L$ with label sets of size at most $k$ (i.e. $|M| \le k$) has $\OPT(\L) \ge 1 - \d$ or $\OPT(\L) \le \e$.
+\end{conjecture}
+
+Although the UGC is open, is had already been proven to provide powerful inapproximability results, some of which we summarize in figure \ref{ugctable}
+
+\begin{table}[]
+  \centering
+  \begin{tabular}{|p{2.5cm}|p{2.5cm}|p{2cm}|p{2.5cm}|}
+    \hline 
+    \textbf{Problem} & \textbf{Best Known Approx.} & \textbf{Best UGC Innapprox.} & \textbf{Best Other Innapprox.} \\\hline
+    Vertex Cover & 2 & $2 - \e$ & 1.36 \\\hline
+    MaxCut & $\a_{MC} \approx 1.13$ & $\a_{MC} - \e$ & $(\frac{17}{16} \approx 1.06) - \e$ \\\hline
+    Max-2SAT &$\a_{LLZ} \approx 1.06$ & $\a_{LLZ} - \e$ & \APX-Hard \\\hline
+    Max Acylic Subgraph & 2 & $ 2 - \e$ & $(\frac{66}{65} \approx 1.02)- \e$ \\\hline
+    Any CSP $\mathcal{C}$ with integrality gap $\a_\C$ & $\a_\C$ & $\a_\C - \e$ & None \\\hline
+    Sparsest Cut & $O(\sqrt{\log{n}})$ & $\omega(1)$ & Hard for some constant factor\\\hline
+  \end{tabular}
+  \caption{Effect of UGC on innapproximability results}
+  \label{ugctable}
+\end{table}
+
+We now proceed to elaborate upon such reductions, giving both a specific example and a general framework.
+
+
 \end{document}
