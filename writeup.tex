@@ -1,21 +1,115 @@
 \documentclass{article}
-\usepackage{scribe}
-
+\usepackage{scribe, bbm}
 \title{Final Writeup - The Unique Games Conjecture}
 \author{Robert Wang and Joshua Turcotti}
-
+\newcommand{\1}{\mathbbm{1}}
+\newcommand{\om}{\omega}
+\newcommand{\F}{\mathbb{F}}
 \begin{document}
 \maketitle
 \section*{Examples of Reductions for CSP problems}
-In this section, we present two specific examples of proofs showing the UGC implies a particular hardness result for CSPs. The general framework of the reduction is as follows: Suppose we want to show that $UGC$ implies it is NP-hard to solve the $(1-\alpha, c+\gamma)$ version of a particular $CSP$ problem. for any $\alpha, \gamma > 0$ (i.e. $c$ is the best constant approximation factor).: Start with arbitrary instance of Unique Label Cover, $\mathcal{I}$. Use it to construct a PCP verifier for the $CSP$ problem such that:
+In this section, we present two specific examples of proofs showing the UGC implies a particular hardness result for CSPs. The general framework of the reduction is as follows: Suppose we want to show that $UGC$ implies it is NP-hard to solve the $(1-\alpha, c+\gamma)$ version of a particular $CSP$ problem. for any $\alpha, \gamma > 0$ (i.e. $c$ is the best constant approximation factor).: Start with arbitrary instance of Unique Label Cover, $\mathcal{L}$. Use it to construct a PCP verifier for the $CSP$ problem such that:
 \begin{enumerate}[1)]
-            \item if $OPT(\mathcal{I}) > 1-\epsilon$, then $P[Accept] \geq 1-\alpha(\epsilon)$
-            \item if $OPT(\mathcal{I}) \leq \delta$, then $P[Accept] \leq c(\delta)$
+            \item if $OPT(\mathcal{L}) > 1-\epsilon$, then $P[Accept] \geq 1-\alpha(\epsilon)$
+            \item if $OPT(\mathcal{L}) \leq \delta$, then $P[Accept] \leq c(\delta)$
 \end{enumerate}
-Where $\alpha(\epsilon), c+\gamma(\delta)\rightarrow 0$ as $\epsilon,\delta\rightarrow 0$. Then, use the PCP verifier to construct an instance, $\mathcal{I}'$ of the $CSP$ such that $OPT(\mathcal{I}') = P[Accept]$. Then solving the $(1-\alpha, c+\gamma)$ gap version of the CSP problem implies solving the $(1-\epsilon, \delta)$ version of the original Unique label cover problem, which, by the $UGC$ is $NP-$hard.
+Where $\alpha(\epsilon), c+\gamma(\delta)\rightarrow 0$ as $\epsilon,\delta\rightarrow 0$. Then, use the PCP verifier to construct an instance, $\mathcal{L}'$ of the $CSP$ such that $OPT(\mathcal{L}') = P[Accept]$. Then solving the $(1-\alpha, c+\gamma)$ gap version of the CSP problem implies solving the $(1-\epsilon, \delta)$ version of the original Unique label cover problem, which, by the $UGC$ is $NP-$hard. In particular the PCP verifier will ask the prover to give the labels of a satisfying assignment to the unique label cover instance in the form of long codes. That is, for each vertex $v$, the prover will send a function $f_v:\{-1,1\}^M\rightarrow \{-1,1\}$ such that $f_v(x) = x_{\ell(v)}$, where $\ell(v)$ is the label for vertex $v$. The verifier will pick edges randomly and evaluate the prover's supposed long codes on random inputs, and then apply the predicate in the CSP to the outputs. The goal is to show that if there exists a labelling satisfying many clauses, the accept probability will be high, and if all labellings satisfy a low number of clauses then the accept probability is low. This means that good approximations for the given CSP problem will lead to good approximations for unique label cover, which is conjectured to be NP hard.
 \subsection*{Max-3-Lin:}
 The problem $Max-3-Lin$ is as follows. Given a set of constraints of the form $x_i + x_j + x_j = c \mod 2$, we want to find an assignment to the variables $x_i$ that satisfies the most number of constraints. Note that if we apply the transformation $x\mapsto (-1)^x$, the constraints take the form of $y_iy_jy_k = d$ for $y_i,y_j,y_k,d\in \{-1,1\}$. We will use the product convention as it makes the Fourier Analysis much easier.
 \begin{theorem}
-If the UGC is true, then the $()$
+If the UGC is true, then the $(1-\alpha, 1/2+\gamma)$-Gap version of Max-3-Lin is NP Hard for all $\alpha,\gamma > 0$.
 \end{theorem}
+Note that a $1/2$ approximation to Max-3-Lin can be obtained on expectation simply by assigning the values to the variables uniformly at random. A deterministic approximation can be obtained using the conditional expectation method. Let $\mathcal{L} = (G=(V,W,E), \pi)$ be an arbitrary instance of unique games label cover. We will construct the following PCP verifier for Max-3-Lin:
+\begin{itemize}
+    \item Pick $v$ u.a.r. from $V$ and $w_1, w_2, w_3$ u.a.r. from $N(v)$ with replacement
+    \item pick $x,y\in \{-1,1\}^M$ u.a.r, and $\mu\in\{-1,1\}^M$ such that $\mu_i = 1$ w.p. $1-\epsilon$ and $-1$ otherwise. Let $z=xy\mu$ (entrywise)
+    \item let $x' = x\circ \pi_{w_1,v}$, $y'=y\circ \pi_{w_2, v}$ and $z'=z\circ \pi_{w_3,v}$. Here $(x \circ \pi)_i = x_{\pi(i)}$, i.e. permute the entries of $x$ by $\pi$
+    \item Ask prover for long codes $f_{w_1}, f_{w_2}$, $f_{w_3}$, then flip a coin to decide which of the following to perform
+    \begin{enumerate}
+        \item accept iff $f_{w_1}(x')f_{w_2}(y')f_{w_3}(z') = 1$
+        \item accept iff $f_{w_1}(x')f_{w_2}(y')f_{w_3}(-z') = -1$
+    \end{enumerate}
+\end{itemize}
+
+\begin{lemma}
+(Completeness) If $OPT(\mathcal{L}) \geq 1-\epsilon$, then $P[Accept] \geq 1-4\epsilon$
+\end{lemma}
+\begin{proof}
+If there is an assignment of labels satisfying at least $1-\epsilon$ fraction of edges, then the prover can answer with long codes corresponding to that labelling. By union bound, the probability that all 3 edges are satisfied and $\mu_{\ell(v)} = 1$ is at least $1-4\epsilon$. For ease of notation, we will let $x(i)$ denote $x_i$. If all these events occur, then we have $f_{w_1}(x)f_{w_2}(y)f_{w_3}(z) = x(\pi_{w_1,v}(w_1))y(\pi_{w_2,v}(w_2))x(\pi_{w_3,v}(w_3))y(\pi_{w_3,v}(w_3))\mu(\pi_{w_3,v}(w_3)) = (x_{\ell(v)}y_{\ell(v)})^2\mu_{\ell(v)} = 1$. Note the second test is the same as the first test since long codes are linear functions.
+\end{proof}
+\begin{lemma}
+(Soundness) If $OPT(\mathcal{L})\leq \delta$, then $P[Accept]\leq 1/2 + O((\delta/\epsilon)^{1/5})$
+\end{lemma}
+\begin{proof}
+Let $\rho$ be the acceptance probability. Since for $x\in \{-1,1\}$, we have $\frac{1+x}{2} = \1_{x=1}$, we have
+\begin{align*}
+    \rho &= \frac{1}{2}(E[(1+f_{w_1}(x')f_{w_2}(y')f_{w_3}(z'))/2] + E[(1-f_{w_1}(x')f_{w_2}(y')f_{w_3}(-z'))/2])\\
+    &= 1/2 + \frac{1}{4}(E[f_{w_1}(x')f_{w_2}(y')f_{w_3}(z')]-E[f_{w_1}(x')f_{w_2}(y')f_{w_3}(-z'))])\\
+    &= 1/2 + \frac{1}{4}E_v[E_{x,y,\mu}[g_v(x)g_v(y)g_v(z)]-E_{x,y,\mu}[g_v(x)g_v(y)g_v(-z)]]
+\end{align*}
+Where $g_v(x) = E_w[f_w(x\circ \pi_{w,v})]$. Note that the last step follows from taking iterated expectations. The expectation with respect to $w_1,w_2$ and $w_3$ factors because  $w_1,w_2,w_3$ are independent. For any function, $g$, we can expand it in terms of the Fourier basis and obtain:  $$E_{x,y,\mu}[g(x)g(y)g(z)] = \sum_{S,T,R\subseteq[m]}\hat{g}(S)\hat{g}(T)\hat{g}(R)E_{x,y,\mu}[\chi_S(x)\chi_R(y)\chi_T(z)]$$
+If there is any $i\in S\backslash R$ or $R\backslash i$ then $E[x_i] = 0$ would factor out of the expectation in the sum. Thus, the term in the sum is non-zero only when $S=T=R$, which means
+$$E_{x,y,\mu}[g(x)g(y)g(z)] = \sum_S\hat{g}^3(S)E_{x,y,\mu}[\chi_S(xyz)] = \sum_S\hat{g}^3(S)(1-2\epsilon)^{|S|}$$
+The second equality holds because $\chi_S(xys) = \chi_S((xy)^2\mu) = \chi_S(\mu)$ and $E[\chi(S)(\mu)] = \prod_{i\in S}E[\mu_i] = (1-2\epsilon)^{|S|}$. Similarly, we have $E_{x,y,\mu}[g(x)g(y)g(-z)] = \sum_{S}\hat{g}^3(S)(-1)^{|S|}(1-2\epsilon)^{|S|}$. Putting these together, we have $$E_{x,y,\mu}[g(x)g(y)g(z)-g(x)g(y)g(-z)] = 2\sum_{S:|S|\;odd}\hat{g}^3(S)(1-2\epsilon)^{|S|}$$
+For ease of notation, let $\theta_v = E_{x,y,\mu}[g_v(x)g_v(y)g_v(z)-g_v(x)g_v(y)g_v(-z)]$. Then we have that $\rho = 1/2+\frac{1}{2}E_v[\theta_v]$. If $\rho =1/2 + \gamma$, then we must have $E_v[\theta_v] = 2\gamma$. Since $\theta_v\leq 1$, at least a $\gamma$ fraction of vertices must have $\theta_v \geq \gamma$, as otherwise, we would have $E_v[\theta_v] < (1-\gamma)\gamma +\gamma < 2\gamma$. We denote these vertices as being "good". Now consider the following procedure to construct an assignment for the unique label cover instance given an acceptance probability of $1/2+\gamma$. The general idea is to show that for good vertices $v$, there exists small sets with large fourier coefficients $\hat{g}_v(S)$ and picking a label from these sets is a good labelling strategy.
+\begin{enumerate}[1)]
+    \item If $v\in V$ is a good vertex, let $S\subseteq [M]$ be a non-empty set such that $|S|\leq \epsilon^{-1}\log(2/\gamma)$ and $|\hat{g}_v(S)|\geq \gamma/2$. Let $\ell(v)$ be a uniform random label in $S$. Otherwise assign a label to $v$ arbitrarily.
+    \item For each $w\in W$, let $L_w=\{b| \exists S,\; b\in S,\; |S|\leq \epsilon^{-1}\log(2/\gamma)\wedge |\hat{f}_w(S)|\geq \gamma/4\}$. Let $\ell(w)$ be a uniform random element in $L_w$ if $L_w$ is non-empty. Otherwise pick any arbitrary label.
+\end{enumerate}
+To show that the above labelling is guaranteed to satisfy a certain fraction of edges, we prove the following claims.
+\begin{claim}
+If $\theta_v \geq \gamma$ then there exists $S\subseteq [M]$ such that $|S|\leq \epsilon^{-1}\log{(2/\gamma)}$ and $|\hat{g}_v(S)| \geq \gamma/2$. In other words, step 1 will never fail.
+\end{claim}
+\textbf{proof of claim 4} For ease of notation, let $K = \epsilon^{-1}\log{(2/\gamma)}$. Suppose Claim 4 was false. Then for all $S$ such that $|S| < K$ we have $|\hat{g}_v(S)| < \gamma/2$, which means
+\begin{align*}
+    \theta_v \leq \sum_{S}|\hat{g}_v^3(S)^3|(1-2\epsilon)^{|S|}&< \sum_{|S|\leq K}\frac{\gamma}{2}\hat{g}_v^2(S)^2(1-2\epsilon)^{|S|} + \sum_{|S| > K}\hat{g}_v^2(S)(1-2\epsilon)^{K}\\
+    &\leq \gamma/2 + \sum_{S}e^{-2\epsilon(\epsilon^{-1}\log{(2/\gamma)})}\;\;\;\;\;\text{by Parseval's identity}\\
+    &\leq \gamma\;\;\;\;\;\;\;\;\;\text{contradiction}
+\end{align*}
+\begin{claim} $L_w$ in step 2 has $|L_w|\leq O(\epsilon^{-1}\gamma^{-2}\log{(1/\gamma}))$
+\end{claim}
+\textbf{proof of claim 5}: If $|L_w|\geq c\epsilon^{-1}\gamma^{-2}\log{(1/\gamma}$, then there are at least $c\gamma^{-2}$ sets $S$ with $|f_w(S)|\geq \gamma/4$, by definition of $L_w$. This means $1 = \sum_S\hat{f}_w^2(S)\geq c\gamma^{-2}(\gamma/4)^2$ which means $c\leq 16$.
+\begin{claim}
+If $v$ is good and $N(v)$ denotes the set of vertices adjacent to $v$, then at least $\gamma/4$ fraction of of $w\in N(v)$ have $\ell(v)\in \pi_{w,v}(L_w)$.
+\end{claim}
+\textbf{proof of claim 6:} Suppose $v$ is good. Let $S$
+ be the set in step one from which $\ell(v)$ was picked. Since $\hat{g}_v(S) = E_{w\in N(v)}[\hat{f}_w(\pi_{w,v}^{-1}(S))]$, triangle inequality implies:
+ $E_{w\in N(v)}[|\hat{f}_w(\pi_{w,v}^{-1}(S))|] \geq |\hat{g}_v(S)|\geq \gamma/2$. Since $\hat{f}_w\leq 1$, a similar averaging argument as before shows that at least $\gamma/4$ fraction of $w\in N(v)$ have $|\hat{f}_w(\pi_{w,v}^{-1}(S))|\geq \gamma/4$. For such a $w$, we must also have $|\pi_{w,v}^{-1}(S))| = |S| \leq \epsilon^{-1}\log{(2/\gamma)}$ which means $\pi_{w,v}^{-1}(S))\subseteq L_w$. Since $\ell(v)\in S$ by construction, we have $\pi_{w,v}(L_w) \subseteq S$.\\\\
+ Thus, for at least a $\gamma$ fraction of vertices (the good ones), at least a $\gamma/4$ fraction of their adjacent edges will be satisfied with probability $1/|L_w| = \Omega(\epsilon\gamma^2/\log{1/\gamma})$, which means the expected number of satisfied labels is at least $\Omega(\epsilon\gamma^5)$. If the label cover instance has $OPT(\mathcal{L})\leq \delta$ then we must have that $\gamma = O(\delta/\epsilon)^{1/5}$, since any labelling must satisfy at most $\delta$ fraction of edges.
+\end{proof}
+\textbf{proof of theorem 1:} To convert the PCP verifier to an instance of MAX-3-Lin, we let the variables be $\{f_v(x):v\in V\cup W, \; x\in \{0,1\}^M\}$. Since $M$ is constant, the number of variables is polynomial sized. The set of constraints are of the form $f_u(x_1)f_{v}(x_2)f_{w}(x_3) = c$ where $c\in \{1,-1\}$  and $u,v,w$ are adjacent to the same vertex. The weight of each constraint is the probability that the particular constraint will be chosen in the verification step. This gives a Max-3-Lin instance whose optimal value is equalled to $P[Accept]$ for the PCP verifier.
+\subsection*{NAEQ-SAT}
+Here, we will give another reduction to the problem of NAEQ-SAT over $GF(3)$. This is a CSP where each clause is of the form Not-All-Equal$(x_i, x_j, x_k)$ where $x_i \in GF(3)$. We will apply the transformation $x\mapsto \omega^x$ to make the Fourier analysis easier. Let $\F = \{1,\om,\om^2\}$.the Fourier analysis will be over functions $f:\F^M\rightarrow \F$. Since $1+\om+\om^2 = 0$, if $X\sim Unif(\F)$, $E[X] = 0$. Thus, the Fourier basis for such functions remain the same. Since $\F$ is a complex field, the inner product will be given by $<f,g> = E_{x,y}[f(x)\bar{g}(y)]$ where $x,y\sim Unif(\F^M)$. 
+\begin{theorem}
+If the UGC holds, then for any $\alpha, \gamma > 0$, the $(1-\alpha, 8/9+\gamma)$ gap version of $NAEQ$ SAT in $GF(3)$ is NP hard.
+\end{theorem}
+Note that an $8/9$ fraction approximation can be obtained by random assignments. To prove reduction, we will again construct a PCP verifier for NAEQ-SAT using an instance $\mathcal{L} = (G=(V,W,E), \pi)$ of unique label cover:
+\begin{itemize}
+    \item pick a vertex $v\in V$ u,a,r,, and then pick $w_1, w_2, w_3\in N(v)$ u.a.r. with replacement. Let $\pi_1,\pi_2,\pi_3 = \pi_{w_1, v}, \pi_{w_2,v}, \pi_{w_3,v}$
+    \item Pick $x,y \in \F^M$ u.a.r. and pick $\mu \in \{\om, \om^2\}^M$ u.a.r. Let $f_i = f_{w_i}$ for $i=1$ to $3$. Accept iff Not-All-Equal($f_1(x\circ \pi_1), f_2(y\circ\pi_2), f_3((\overline{xy}\circ \pi_3)\mu)$)
+\end{itemize} 
+\textbf{proof of completeness} To see that completeness holds, note that if $OPT(\mathcal{L})\geq 1-\epsilon$, then with probability at least $1-3\epsilon$, all three selected edges are satisfied, assuming prover sent long codes for the optimal labelling. In this case, the clause being verified is equivalent to Not-All-Equal($x_i, y_i, \overline{x_iy_i}\mu_{i}$) for $i = \ell(v)$. If $x_i\neq y_i$ then we are done. If they are equal, then $\overline{x_iy_i} = \bar{x_i^2} = x_i$ and $x_i\mu_i\neq x_i$ since multiplication by $\mu_i$ adds or subtracts one to the exponent of $\om$. Thus, we have $OPT(\mathcal{L}) \geq 1-\epsilon \Rightarrow P[Accept] \geq 1-3\epsilon$.\\\\
+\textbf{Proof of soundness}: As with before, we express the indicator for our clause being satisfied as a function of values in $\F$. We will not give the proof for the following lemma because it is somewhat tedious.
+\begin{lemma}
+Let $a,b,c\in \F$, and $A = \{(r_1, r_2, r_3)\in GF(3)^3: r_1 + r_2+r_3 = 0\mod 3\}$. Then we have $$1-\frac{1}{9}\sum_{(r_1,r_2,r_3)\in A}a^{r_1}b^{r_2}c^{r_3} = \1_{\neg(a=b=c)}$$
+\end{lemma}
+The previous lemma implies that $P[Accept] = 1-\frac{1}{9}\sum_{(r_1,r_2,r_3)\in A}E[f_1(x\circ \pi_1)^{r_1}f_2(y\circ\pi_2)^{r_2}f_3((\overline{xy}\circ \pi_3)\mu)^{r_3}]$. The goal is to show that if this quantity is greater than $8/9$ by a constant factor, then $OPT(\mathcal{L})$ is lower bounded. We will fix $v$ and consider 4 cases to analyze the expectation term inside the summation conditioned on $v$. In the case that $r_1 = r_2 = r_3 = 0$, the expectation term simply evaluates to $1$. \\\\
+Now consider the case $\{r_1, r_2, r_3\} = \{0,1,-1\}$. Note that there are 6 ways for this to occur. Since for any $x,z\in \F^M$ the maps $x\mapsto \bar{x}$, $x\mapsto x\circ\pi_i$ and $x\mapsto xz$ are all bijections, $f_1(x\circ \pi_1), f_2(y\circ\pi_2), f_3((\overline{xy}\circ \pi_3)\mu)$ are identically distributed. Since $x$ and $xy$ are independent, the three terms are also pairwise independent meaning if one term is raised to the power of $0$, the other two are i.i.d. This means that the expectation term conditioned on $v$ becomes $E_{w_1, w_2,x,y}[f_1(x)\bar{f_2}(y)] = E_{w_1,x}[f_1(x)]\overline{E_{w_1,x}[f_1(x)]} = |E_{w_1,x}[f_1(x)]|^2$. By Fourier expanding $f$, and applying linearity of expectation, we get that $E_{w_1,x}[f_1(x)] = E_{w\in N(v)}\sum_{S}[\hat{f}_w(S)E_{x}[\chi_S(x)] = E_w\hat{f}_w(\emptyset) =: \theta_v$. This means that when conditioned on $v$, $E[f_1(x\circ \pi_1)^{r_1}f_2(y\circ\pi_2)^{r_2}f_3((\overline{xy}\circ \pi_3)\mu)^{r_3}] = |\theta_v|^2$.\\\\
+Now consider the case where $r_1=r_2=r_3=1$. Since for any $z\in \F$, $z\bar{z} = 1$, we have:
+\begin{align*}
+    E[f_1(x\circ \pi_1)f_2(y\circ\pi_2)f_3((\overline{xy}\circ \pi_3)\mu)] &= E[\sum_{S,R,T }\hat{f}_1(S)\hat{f}_2(R)\hat{f}_3(T)\chi_{S}(x\circ \pi_1)\chi_{R}(y\circ\pi_2)\chi_{T}(\overline{(xy)}\circ\pi_3\mu)]\\
+    &= E\sum_{S,R,T }\hat{f}_1(S)\hat{f}_2(R)\hat{f}_3(T)E\chi_{\pi_1(S)}(x)\chi_{\pi_2(R)}(y)\chi_{\pi_3(T)}(\overline{(xy)})\chi_T(\mu)]\\
+    &=E\sum_{\pi_1(S)=\pi_2(R)=\pi_3(T) }\hat{f}_1(S)\hat{f}_2(R)\hat{f}_3(T)E_{\mu}[(\chi_{\pi_3(S)}(\mu))|v,w_1,w_2,w_3]\\
+    &= E[\sum_{\pi_1(S)=\pi_2(R)=\pi_3(T) }\hat{f}_1(S)\hat{f}_2(R)\hat{f}_3(T)(-1/2)^{|S|}]
+\end{align*}
+The third line follows from taking expectation of the Fourier basis with respect to $x,y,\mu$ and noting that it is non-zero only when $\pi_1(S) = \pi_2(R) = \pi_3(T)$. The last line follows from the fact that $E[\mu_i] = \frac{1}{2}(\om + \om^2) = Re(\om) = -1/2$.\\\\
+Let $\gamma = E[\sum_{\pi_1(S)=\pi_2(R)=\pi_3(T)\neq \emptyset }\hat{f}_1(S)\hat{f}_2(R)\hat{f}_3(T)(-1/2)^{|S|}]$. Then we have $E[f_1(x\circ \pi_1)f_2(y\circ\pi_2)f_3((\overline{xy}\circ \pi_3)\mu)] = E_v\theta_v^3 + \gamma$. We want to show that if $OPT(\mathcal{L})$ is small, then $\gamma$ becomes negligible. To do so, consider the following labelling strategy: For each $w\in W$, pick a set $R\subseteq [M]$ with probability $\hat{f}_w^2(R)$. Assign $\ell(w)$ to be a random element in $R$. For each $v\in V$, pick a neighbor $w\in N(v)$ and pick a set $T$ with probability $\hat{f}_w^2(T)$. Let $i\in T$ be random, and assign $\ell(v) = \pi_{w,v}(i)$ . If the randomly selected sets are empty just pick a label arbitrarily. For a specific edge $(w_2, v)$, the probability that it is satisfied is at least $E_{w_3\in N(v)}[\sum_{\pi_{2}(R)=\pi_3(T)\neq \emptyset}\hat{f_2}^2(R)\hat{f_3}^{2}(T)/|T|]$
+because if the label of $v$ is draw from $\pi_{w_3,v}(T)$ and the label of $w_2$ is drawn from $R$ and $\pi_{w_2,v}(R) = \pi_{w_3,v}(T)$, then for each label $j\in R$, there is exactly one label $\ell\in \pi_{w_3,v}(T)$ with $\pi_{w_2, v}(i) = j$.
+Now, using Cauchy-Schwartz and Parseval's identity, we can bound $\gamma$ by
+$$\gamma^2\leq E[(\sum_S\hat{f}_1(S)^2)(\sum_{\pi_2(R)=\pi_3(T)\neq \emptyset}\hat{f_2}^2(R)\hat{f_3}^{2}(T)(-1/4)^{|R|}]\leq E_vE_{w_2,w_3\in N(v)}[\sum_{\pi_2(R)=\pi_3(T)\neq \emptyset}\frac{\hat{f_2}^2(R)\hat{f_3}^{2}(T)}{|R|}]$$
+Where the last term is exactly the lower bound for the expected fraction of satisfied edges in the labelling strategy that we derived before. Thus, we may conclude that if $OPT(\mathcal{L})\leq \delta$, then $|\gamma|\leq \sqrt{\delta}$.\\\\
+Finally, if $r_1=r_2=r_3=-1$, then the resulting expectation term is just the complex conjugate of the expectation term for when $r_1=r_2=r_3=1$. This means that we have:
+$$P[Accept]\leq 1-\frac{1}{9}-E_v[\frac{6}{9}|\theta_v|^2 + \frac{1}{9}(\theta_v^3+\bar{\theta}^3)] + O(\sqrt{\delta})$$
+Note that $\frac{6}{9}|\theta_v|^2+\frac{1}{9}(\theta_v^3+\bar{\theta}^3)= \frac{6}{9}|\theta_v|^2+\frac{2}{9}Re(\theta_v^3) = \frac{6}{9}|\theta_v|^2 + \frac{2}{9}(Re(\theta_v)^3-3Re(\theta_v)Im(\theta_v)^2)\geq 0$ because $|\theta_v|\leq 1$, which means $ Re(\theta_v)^3-3Re(\theta_v)Im(\theta_v)^2\geq -3|\theta_v|^2$. This means that $P[Accept]\leq 8/9+O(\sqrt{\delta})$.
 \end{document}
+
