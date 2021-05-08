@@ -3,8 +3,8 @@
 \title{Final Writeup - The Unique Games Conjecture}
 \author{Robert Wang and Joshua Turcotti}
 
-\usepackage{amsmath,amsthm,textcomp,amssymb,geometry,graphicx,enumerate,scribe,bbm}
-
+\usepackage{amsmath,amsthm,textcomp,amssymb,geometry,graphicx,enumerate,scribe,bbm,biblatex}
+\addbibresource{ref.bib}
 \newtheorem{conjecture}{Conjecture}
 %\newtheorem{theorem}{Theroem}
 
@@ -29,11 +29,11 @@
 
 \begin{document}
 \maketitle
-\section{Introduction}
+\section*{Introduction}
 
-This writeup will present our reading and investigations into the Unique Games Conjecture - a robust step in proving innapproximability of certain hard problems. We will formulate it in terms of 2 models - 2 Prover 1 Round Games and Label Cover instances, and justify its usefulness as claimed.
+This writeup will present our reading and investigations into the Unique Games Conjecture - a robust step in proving innapproximability of certain hard problems. We will formulate it in terms of 2 models - 2 Prover 1 Round Games and Label Cover instances, and justify its usefulness as claimed with a survey of hardness results that would follow from proving the UGC \cite{1530695}. We will then present the details of some of the reductions from the original paper in which UGC was introduced \cite{Khot02onthe}. 
 
-\section{2 Prover 1 Round Games}
+\section*{2 Prover 1 Round Games}
 
 
 In order to reason about reductions from known \NP-Hard problems, we define a class of them in particular, called \textit{2 Prover 1 Round Games} involving a Verifier and 2 Provers. An instance $\I$ of a 2P1R game is defined as follows.
@@ -55,21 +55,21 @@ A 2 Prover 1 Round instance $\I$ can be repeated in parallel $n$ times to yield 
 
 \section{Label Cover Instances}
 
-We now provide a slight specification of the 2 Prover 1 Round model called the \textit{Label Cover} problem. An instance \L of the Label Cover problem consists of:
+We now provide a slight specification of the 2 Prover 1 Round model called the \textit{Label Cover} problem. An instance \L, of the Label Cover problem consists of:
 \begin{itemize}
-\item A complete bipartite graph $G(V, W)$ with bipartition $V, W$
-\item A weight $p_{vw}$ assigned to every edge with $\sum_{v, w}p_{vw} = 1$
-\item Label sets $N, M$ for vertices in $V, W$ respectively.
-\item Projection functions $\pi_{vw} : M \to N$ for every edge $(v, w)$ in $G$
+\item A complete bipartite graph $G=(W,V,E)$ with bipartition $V, W$
+\item A weight $p_{w,v}$ assigned to every edge with $\sum_{(w,v)\in E}p_{w,v} = 1$
+\item Label sets $[N], [M]$ for vertices in $V, W$ respectively.
+\item Projection functions $\pi_{w,v} : M \to N$ for every edge $(w,v)$ in $G$
 \end{itemize}
-An assignment to this CSP consists of choosing label functions $L_V: V \to N$ and $L_W: W \to M$, yielding the following definition:
-\[OPT(\L) := \max_{L_V, L_W} \sum_{(v, w) \in G}p_{vw}\cdot\Ind\{\pi_{vw}(L_W(w)) = L_V(v)\}\]
-A Label Cover instance $\L$ is called \textit{unique} if $M = N$ and every function $\pi_{vw}$ is a bijection.
+An assignment to this CSP consists of choosing label functions $\ell_V: V \to N$ and $\ell_W: W \to M$, yielding the following definition:
+\[OPT(\L) := \max_{\ell_V,\ell_W} \sum_{(w,v) \in G}p_{w,v}\cdot\Ind\{\pi_{w,v}(\ell_W(w)) = \ell_V(v)\}\]
+A Label Cover instance $\L$ is called \textit{unique} if $M = N$ and every function $\pi_{w,v}$ is a bijection.
 
 
-Since Label Cover is a CSP, we can apply the PCP theorem to any label cover problem to obtain the \NP-Hardness of a $(\rho, 1)$ Gap version of some instance $\L$ of that problem, for some $\rho$. Since Label Cover is equivalent to a 2 Prover 1 Round game in which the Verifier asks questions from $V, W$ with joint probabilities $p_{vw}$, the provers respond with answers $L_V(v)$ and $L_W(w)$, and the Verifier accepts if the projection functions $\pi_{vw}$ are satisfied, we can apply Raz's Parallel Repetition Theorem to strengthen the Gap to an arbitrarily chosen $\rho$, noting that Label cover just as easy simulates parallel repetition of a 2P1R instance as the original.
+Since Label Cover is a CSP, we can apply the PCP theorem to any label cover problem to obtain the \NP-Hardness of a $(1, \rho)$ Gap version of some instance $\L$ of that problem, for some $\rho$. Since Label Cover is equivalent to a 2 Prover 1 Round game in which the Verifier asks questions from $V, W$ with joint probabilities $p_{w,v}$, the provers respond with answers $\ell_V(v)$ and $\ell_W(w)$, and the Verifier accepts if the projection functions $\pi_{w,v}$ are satisfied, we can apply Raz's Parallel Repetition Theorem to strengthen the Gap to an arbitrarily chosen $\rho$, noting that Label cover just as easy simulates parallel repetition of a 2P1R instance as the original.
 \begin{theorem}
-  For every constant $\e > 0$, there exists a constant $k = k(\e)$ such that it is \NP-Hard to determine whether a Label Cover instance $\L$ with answers from sets of size at most $k$ (i.e. $|M|, |N| \le k$) has $\OPT(\L) = 1$ or $\OPT(\L) \le \e$.
+  For every constant $\e > 0$, there exists a constant $k = k(\e)$ such that it is \NP-Hard to determine whether a Label Cover instance $\L$ with answers from sets of size at most $k$ (i.e. $M, N \le k$) has $\OPT(\L) = 1$ or $\OPT(\L) \le \e$.
 \end{theorem}
 
 \section{Introducing the Unique Games Conjecture}
@@ -77,9 +77,9 @@ Since Label Cover is a CSP, we can apply the PCP theorem to any label cover prob
 
 
 
-The preceeding theorem, $\NP$-Hardness of the $(\e, 1)$ Gap version of Label Cover for arbitrary $\e > 0$ is powerful as the source of reductions to other Gap problems that we wish to show are $\NP$-Hard. However, the requirement of \textit{Perfect Completeness}, i.e. acceptance only if $\OPT(\L) = 1$ is too strong for many desired reductions, so at the cost of restriction to \textit{unique} instances of Label Cover, which can be seen to be equivalent to \textit{unique} instance of 2P1R games, we can relax to imperfect completeness and obtain the following conjecture:
+The preceeding theorem, $\NP$-Hardness of the $(1,\e)$ Gap version of Label Cover for arbitrary $\e > 0$ is powerful as the source of reductions to other Gap problems that we wish to show are $\NP$-Hard. However, the requirement of \textit{Perfect Completeness}, i.e. acceptance only if $\OPT(\L) = 1$ is too strong for many desired reductions, so at the cost of restriction to \textit{unique} instances of Label Cover, which can be seen to be equivalent to \textit{unique} instance of 2P1R games, we can relax to imperfect completeness and obtain the following conjecture:
 \begin{conjecture}[Unique Games Conjecture]
-  For arbitrarily small constants $\e, \d > 0$, there exists a constant $k = k(\e, \d)$ such that it is \NP-Hard to determine whether a unique Label Cover instance $\L$ with label sets of size at most $k$ (i.e. $|M| \le k$) has $\OPT(\L) \ge 1 - \d$ or $\OPT(\L) \le \e$.
+  For arbitrarily small constants $\e, \d > 0$, there exists a constant $k = k(\e, \d)$ such that it is \NP-Hard to determine whether a unique Label Cover instance $\L$ with label sets of size at most $k$ (i.e. $|M| \le k$) has $\OPT(\L) \ge 1 - \e$ or $\OPT(\L) \le \d$.
 \end{conjecture}
 
 Although the UGC is open, is had already been proven to provide powerful inapproximability results, some of which we summarize in figure \ref{ugctable}
@@ -102,12 +102,14 @@ Although the UGC is open, is had already been proven to provide powerful inappro
 
 We now proceed to elaborate upon such reductions, giving both a specific example and a general framework.
 \section*{Examples of Reductions for CSP problems}
-In this section, we present two specific examples of proofs showing the UGC implies a particular hardness result for CSPs. The general framework of the reduction is as follows: Suppose we want to show that $UGC$ implies it is NP-hard to solve the $(1-\alpha, c+\gamma)$ version of a particular $CSP$ problem. for any $\alpha, \gamma > 0$ (i.e. $c$ is the best constant approximation factor).: Start with arbitrary instance of Unique Label Cover, $\mathcal{L}$. Use it to construct a PCP verifier for the $CSP$ problem such that:
+In this section, we present two specific examples of proofs showing the UGC implies a particular hardness result for CSPs. The general framework of the reduction is as follows: Suppose we want to show that $UGC$ implies it is NP-hard to solve the $(s-\alpha, c+\gamma)$ version of a particular $CSP$ problem for any $\alpha, \gamma > 0$ (i.e. $c/s$ is the best constant approximation factor). Start with arbitrary instance of Unique Label Cover, $\mathcal{L}$. Use it to construct a PCP verifier for the $CSP$ problem such that:
 \begin{enumerate}[1)]
-            \item if $OPT(\mathcal{L}) > 1-\epsilon$, then $P[Accept] \geq 1-\alpha(\epsilon)$
-            \item if $OPT(\mathcal{L}) \leq \delta$, then $P[Accept] \leq c(\delta)$
+            \item if $OPT(\mathcal{L}) > 1-\epsilon$, then $P[Accept] \geq s-\alpha(\epsilon)$
+            \item if $OPT(\mathcal{L}) \leq \delta$, then $P[Accept] \leq c+\gamma(\delta)$
 \end{enumerate}
-Where $\alpha(\epsilon), c+\gamma(\delta)\rightarrow 0$ as $\epsilon,\delta\rightarrow 0$. Then, use the PCP verifier to construct an instance, $\mathcal{L}'$ of the $CSP$ such that $OPT(\mathcal{L}') = P[Accept]$. Then solving the $(1-\alpha, c+\gamma)$ gap version of the CSP problem implies solving the $(1-\epsilon, \delta)$ version of the original Unique label cover problem, which, by the $UGC$ is $NP-$hard. In particular the PCP verifier will ask the prover to give the labels of a satisfying assignment to the unique label cover instance in the form of long codes. That is, for each vertex $v$, the prover will send a function $f_v:\{-1,1\}^M\rightarrow \{-1,1\}$ such that $f_v(x) = x_{\ell(v)}$, where $\ell(v)$ is the label for vertex $v$. The verifier will pick edges randomly and evaluate the prover's supposed long codes on random inputs, and then apply the predicate in the CSP to the outputs. The goal is to show that if there exists a labelling satisfying many clauses, the accept probability will be high, and if all labellings satisfy a low number of clauses then the accept probability is low. This means that good approximations for the given CSP problem will lead to good approximations for unique label cover, which is conjectured to be NP hard.
+Where $\alpha(\epsilon), \gamma(\delta)\rightarrow 0$ as $\epsilon,\delta\rightarrow 0$. Then, use the PCP verifier to construct an instance, $\mathcal{L}'$ of the $CSP$ such that $OPT(\mathcal{L}') = P[Accept]$. Then solving the $(1-\alpha, c+\gamma)$ gap version of the CSP problem implies solving the $(1-\epsilon, \delta)$ version of the original Unique label cover problem, which, by the $UGC$ is $NP-$hard. In particular the PCP verifier will ask the prover to give the labels of a satisfying assignment to the unique label cover instance in the form of long codes. That is, for each vertex $v$, the prover will send a function $f_v:\{-1,1\}^M\rightarrow \{-1,1\}$ such that $f_v(x) = x_{\ell(v)}$, where $\ell(v)$ is the label for vertex $v$. The verifier will pick edges randomly and evaluate the prover's supposed long codes on random inputs, and then apply the predicate in the CSP to the outputs. The goal is to show that if there exists a labelling satisfying many clauses, the accept probability will be high, and if all labellings satisfy a low number of clauses then the accept probability is low. This means that good approximations for the given CSP problem will lead to good approximations for unique label cover, which is conjectured to be NP hard.
+\subsection*{Fourier Analysis Notation}
+In this section we will introduce some basic Fourier Analysis notation that will be used later in the reduction. The proofs mostly follow from basic linear algebra properties so will be omitted here. Let $f:\{-1,1\}^d\rightarrow \{-1,1\}$ be a function on the boolean hypercube. The set of such functions form a vector space of dimension $2^d$. The functions $\chi_S(x) = \prod_{i\in S}x_i$, $S\subseteq [d]$ form an orthonormal basis for the set of all functions on the boolean hypercube with respect to the inner product $<f,g> = E_{x\sim Unif(-1,1)^d}[f(x)g(x)]$ since each coordinate $x_i$ is independent under the uniform distribution. Thus, we can express each $f$ in terms of these basis vectors $f=\sum_{S\subseteq [d]}\hat{f}(S)\chi_S$ where $\hat{f}(S) = E[f(x)\chi_S(x)]$. Since $f^2 \equiv 1$, we have $1 = <f,f> = \sum_{S\subseteq [d]}\hat{f}^2(S)$, which is known as Parseval's indentity.
 \subsection*{Max-3-Lin:}
 The problem $Max-3-Lin$ is as follows. Given a set of constraints of the form $x_i + x_j + x_j = c \mod 2$, we want to find an assignment to the variables $x_i$ that satisfies the most number of constraints. Note that if we apply the transformation $x\mapsto (-1)^x$, the constraints take the form of $y_iy_jy_k = d$ for $y_i,y_j,y_k,d\in \{-1,1\}$. We will use the product convention as it makes the Fourier Analysis much easier.
 \begin{theorem}
@@ -124,7 +126,7 @@ Note that a $1/2$ approximation to Max-3-Lin can be obtained on expectation simp
         \item accept iff $f_{w_1}(x')f_{w_2}(y')f_{w_3}(-z') = -1$
     \end{enumerate}
 \end{itemize}
-
+Note that in this setup, we assumed that the label cover instance is unweighted for simplicity of notation. In the case where it is weighted, we can simply sample $v$ with probability proportional to $\sum_{(w\in N(v)}p_{w,v}$, and then sample it's neighbor $w$ with probability proportional to $p_{w,v}$
 \begin{lemma}
 (Completeness) If $OPT(\mathcal{L}) \geq 1-\epsilon$, then $P[Accept] \geq 1-4\epsilon$
 \end{lemma}
@@ -154,7 +156,7 @@ To show that the above labelling is guaranteed to satisfy a certain fraction of 
 \begin{claim}
 If $\theta_v \geq \gamma$ then there exists $S\subseteq [M]$ such that $|S|\leq \epsilon^{-1}\log{(2/\gamma)}$ and $|\hat{g}_v(S)| \geq \gamma/2$. In other words, step 1 will never fail.
 \end{claim}
-\textbf{proof of claim 4} For ease of notation, let $K = \epsilon^{-1}\log{(2/\gamma)}$. Suppose Claim 4 was false. Then for all $S$ such that $|S| < K$ we have $|\hat{g}_v(S)| < \gamma/2$, which means
+\textbf{proof of claim 6} For ease of notation, let $K = \epsilon^{-1}\log{(2/\gamma)}$. Suppose Claim 4 was false. Then for all $S$ such that $|S| < K$ we have $|\hat{g}_v(S)| < \gamma/2$, which means
 \begin{align*}
     \theta_v \leq \sum_{S}|\hat{g}_v^3(S)^3|(1-2\epsilon)^{|S|}&< \sum_{|S|\leq K}\frac{\gamma}{2}\hat{g}_v^2(S)^2(1-2\epsilon)^{|S|} + \sum_{|S| > K}\hat{g}_v^2(S)(1-2\epsilon)^{K}\\
     &\leq \gamma/2 + \sum_{S}e^{-2\epsilon(\epsilon^{-1}\log{(2/\gamma)})}\;\;\;\;\;\text{by Parseval's identity}\\
@@ -162,11 +164,11 @@ If $\theta_v \geq \gamma$ then there exists $S\subseteq [M]$ such that $|S|\leq 
 \end{align*}
 \begin{claim} $L_w$ in step 2 has $|L_w|\leq O(\epsilon^{-1}\gamma^{-2}\log{(1/\gamma}))$
 \end{claim}
-\textbf{proof of claim 5}: If $|L_w|\geq c\epsilon^{-1}\gamma^{-2}\log{(1/\gamma}$, then there are at least $c\gamma^{-2}$ sets $S$ with $|f_w(S)|\geq \gamma/4$, by definition of $L_w$. This means $1 = \sum_S\hat{f}_w^2(S)\geq c\gamma^{-2}(\gamma/4)^2$ which means $c\leq 16$.
+\textbf{proof of claim 7}: If $|L_w|\geq c\epsilon^{-1}\gamma^{-2}\log{(1/\gamma}$, then there are at least $c\gamma^{-2}$ sets $S$ with $|f_w(S)|\geq \gamma/4$, by definition of $L_w$. This means $1 = \sum_S\hat{f}_w^2(S)\geq c\gamma^{-2}(\gamma/4)^2$ which means $c\leq 16$.
 \begin{claim}
 If $v$ is good and $N(v)$ denotes the set of vertices adjacent to $v$, then at least $\gamma/4$ fraction of of $w\in N(v)$ have $\ell(v)\in \pi_{w,v}(L_w)$.
 \end{claim}
-\textbf{proof of claim 6:} Suppose $v$ is good. Let $S$
+\textbf{proof of claim 8:} Suppose $v$ is good. Let $S$
  be the set in step one from which $\ell(v)$ was picked. Since $\hat{g}_v(S) = E_{w\in N(v)}[\hat{f}_w(\pi_{w,v}^{-1}(S))]$, triangle inequality implies:
  $E_{w\in N(v)}[|\hat{f}_w(\pi_{w,v}^{-1}(S))|] \geq |\hat{g}_v(S)|\geq \gamma/2$. Since $\hat{f}_w\leq 1$, a similar averaging argument as before shows that at least $\gamma/4$ fraction of $w\in N(v)$ have $|\hat{f}_w(\pi_{w,v}^{-1}(S))|\geq \gamma/4$. For such a $w$, we must also have $|\pi_{w,v}^{-1}(S))| = |S| \leq \epsilon^{-1}\log{(2/\gamma)}$ which means $\pi_{w,v}^{-1}(S))\subseteq L_w$. Since $\ell(v)\in S$ by construction, we have $\pi_{w,v}(L_w) \subseteq S$.\\\\
  Thus, for at least a $\gamma$ fraction of vertices (the good ones), at least a $\gamma/4$ fraction of their adjacent edges will be satisfied with probability $1/|L_w| = \Omega(\epsilon\gamma^2/\log{1/\gamma})$, which means the expected number of satisfied labels is at least $\Omega(\epsilon\gamma^5)$. If the label cover instance has $OPT(\mathcal{L})\leq \delta$ then we must have that $\gamma = O(\delta/\epsilon)^{1/5}$, since any labelling must satisfy at most $\delta$ fraction of edges.
@@ -175,7 +177,7 @@ If $v$ is good and $N(v)$ denotes the set of vertices adjacent to $v$, then at l
 \subsection*{NAEQ-SAT}
 Here, we will give another reduction to the problem of NAEQ-SAT over $GF(3)$. This is a CSP where each clause is of the form Not-All-Equal$(x_i, x_j, x_k)$ where $x_i \in GF(3)$. We will apply the transformation $x\mapsto \omega^x$ to make the Fourier analysis easier. Let $\F = \{1,\om,\om^2\}$.the Fourier analysis will be over functions $f:\F^M\rightarrow \F$. Since $1+\om+\om^2 = 0$, if $X\sim Unif(\F)$, $E[X] = 0$. Thus, the Fourier basis for such functions remain the same. Since $\F$ is a complex field, the inner product will be given by $<f,g> = E_{x,y}[f(x)\bar{g}(y)]$ where $x,y\sim Unif(\F^M)$. 
 \begin{theorem}
-If the UGC holds, then for any $\alpha, \gamma > 0$, the $(1-\alpha, 8/9+\gamma)$ gap version of $NAEQ$ SAT in $GF(3)$ is NP hard.
+If the UGC holds, then for any $\alpha, \gamma > 0$, the $(1-\alpha, 8/9+\gamma)$ gap version of $NAEQ$ SAT in $GF(3)$ is NP hard. 
 \end{theorem}
 Note that an $8/9$ fraction approximation can be obtained by random assignments. To prove reduction, we will again construct a PCP verifier for NAEQ-SAT using an instance $\mathcal{L} = (G=(V,W,E), \pi)$ of unique label cover:
 \begin{itemize}
@@ -183,7 +185,7 @@ Note that an $8/9$ fraction approximation can be obtained by random assignments.
     \item Pick $x,y \in \F^M$ u.a.r. and pick $\mu \in \{\om, \om^2\}^M$ u.a.r. Let $f_i = f_{w_i}$ for $i=1$ to $3$. Accept iff Not-All-Equal($f_1(x\circ \pi_1), f_2(y\circ\pi_2), f_3((\overline{xy}\circ \pi_3)\mu)$)
 \end{itemize} 
 \textbf{proof of completeness} To see that completeness holds, note that if $OPT(\mathcal{L})\geq 1-\epsilon$, then with probability at least $1-3\epsilon$, all three selected edges are satisfied, assuming prover sent long codes for the optimal labelling. In this case, the clause being verified is equivalent to Not-All-Equal($x_i, y_i, \overline{x_iy_i}\mu_{i}$) for $i = \ell(v)$. If $x_i\neq y_i$ then we are done. If they are equal, then $\overline{x_iy_i} = \bar{x_i^2} = x_i$ and $x_i\mu_i\neq x_i$ since multiplication by $\mu_i$ adds or subtracts one to the exponent of $\om$. Thus, we have $OPT(\mathcal{L}) \geq 1-\epsilon \Rightarrow P[Accept] \geq 1-3\epsilon$.\\\\
-\textbf{Proof of soundness}: As with before, we express the indicator for our clause being satisfied as a function of values in $\F$. We will not give the proof for the following lemma because it is somewhat tedious.
+\textbf{Proof of soundness}: Here, we will show that if $OPT(\mathcal{L})\leq \delta$ then $P[Accept]\leq 8/9+O(\sqrt{\delta})$. As with before, we express the indicator for our clause being satisfied as a function of values in $\F$. We will not give the proof for the following lemma because it is somewhat tedious.
 \begin{lemma}
 Let $a,b,c\in \F$, and $A = \{(r_1, r_2, r_3)\in GF(3)^3: r_1 + r_2+r_3 = 0\mod 3\}$. Then we have $$1-\frac{1}{9}\sum_{(r_1,r_2,r_3)\in A}a^{r_1}b^{r_2}c^{r_3} = \1_{\neg(a=b=c)}$$
 \end{lemma}
@@ -197,13 +199,23 @@ Now consider the case where $r_1=r_2=r_3=1$. Since for any $z\in \F$, $z\bar{z} 
     &= E[\sum_{\pi_1(S)=\pi_2(R)=\pi_3(T) }\hat{f}_1(S)\hat{f}_2(R)\hat{f}_3(T)(-1/2)^{|S|}]
 \end{align*}
 The third line follows from taking expectation of the Fourier basis with respect to $x,y,\mu$ and noting that it is non-zero only when $\pi_1(S) = \pi_2(R) = \pi_3(T)$. The last line follows from the fact that $E[\mu_i] = \frac{1}{2}(\om + \om^2) = Re(\om) = -1/2$.\\\\
-Let $\gamma = E[\sum_{\pi_1(S)=\pi_2(R)=\pi_3(T)\neq \emptyset }\hat{f}_1(S)\hat{f}_2(R)\hat{f}_3(T)(-1/2)^{|S|}]$. Then we have $E[f_1(x\circ \pi_1)f_2(y\circ\pi_2)f_3((\overline{xy}\circ \pi_3)\mu)] = E_v\theta_v^3 + \gamma$. We want to show that if $OPT(\mathcal{L})$ is small, then $\gamma$ becomes negligible. To do so, consider the following labelling strategy: For each $w\in W$, pick a set $R\subseteq [M]$ with probability $\hat{f}_w^2(R)$. Assign $\ell(w)$ to be a random element in $R$. For each $v\in V$, pick a neighbor $w\in N(v)$ and pick a set $T$ with probability $\hat{f}_w^2(T)$. Let $i\in T$ be random, and assign $\ell(v) = \pi_{w,v}(i)$ . If the randomly selected sets are empty just pick a label arbitrarily. For a specific edge $(w_2, v)$, the probability that it is satisfied is at least $E_{w_3\in N(v)}[\sum_{\pi_{2}(R)=\pi_3(T)\neq \emptyset}\hat{f_2}^2(R)\hat{f_3}^{2}(T)/|T|]$
+Let $\gamma = E[\sum_{\pi_1(S)=\pi_2(R)=\pi_3(T)\neq \emptyset }\hat{f}_1(S)\hat{f}_2(R)\hat{f}_3(T)(-1/2)^{|S|}]$. Then we have $E[f_1(x\circ \pi_1)f_2(y\circ\pi_2)f_3((\overline{xy}\circ \pi_3)\mu)] = E_v\theta_v^3 + \gamma$. We want to show that if $OPT(\mathcal{L})$ is small, then $\gamma$ becomes negligible. To do so, consider the following labelling strategy: 
+\begin{itemize}
+    \item For each $w\in W$, pick a set $R\subseteq [M]$ with probability $\hat{f}_w^2(R)$. Assign $\ell(w)$ to be a uniform random element in $R$.
+    \item For each $v\in V$, pick a neighbor $w\in N(v)$ and pick a set $T$ with probability $\hat{f}_w^2(T)$
+    \item Let $i\in T$ be random, and assign $\ell(v) = \pi_{w,v}(i)$. If the randomly selected sets are empty just pick a label arbitrarily. 
+\end{itemize}
+For a specific edge $(w_2, v)$, the probability that it is satisfied is at least $E_{w_3\in N(v)}[\sum_{\pi_{2}(R)=\pi_3(T)\neq \emptyset}\hat{f_2}^2(R)\hat{f_3}^{2}(T)/|T|]$
 because if the label of $v$ is draw from $\pi_{w_3,v}(T)$ and the label of $w_2$ is drawn from $R$ and $\pi_{w_2,v}(R) = \pi_{w_3,v}(T)$, then for each label $j\in R$, there is exactly one label $\ell\in \pi_{w_3,v}(T)$ with $\pi_{w_2, v}(i) = j$.
 Now, using Cauchy-Schwartz and Parseval's identity, we can bound $\gamma$ by
 $$\gamma^2\leq E[(\sum_S\hat{f}_1(S)^2)(\sum_{\pi_2(R)=\pi_3(T)\neq \emptyset}\hat{f_2}^2(R)\hat{f_3}^{2}(T)(-1/4)^{|R|}]\leq E_vE_{w_2,w_3\in N(v)}[\sum_{\pi_2(R)=\pi_3(T)\neq \emptyset}\frac{\hat{f_2}^2(R)\hat{f_3}^{2}(T)}{|R|}]$$
 Where the last term is exactly the lower bound for the expected fraction of satisfied edges in the labelling strategy that we derived before. Thus, we may conclude that if $OPT(\mathcal{L})\leq \delta$, then $|\gamma|\leq \sqrt{\delta}$.\\\\
 Finally, if $r_1=r_2=r_3=-1$, then the resulting expectation term is just the complex conjugate of the expectation term for when $r_1=r_2=r_3=1$. This means that we have:
 $$P[Accept]\leq 1-\frac{1}{9}-E_v[\frac{6}{9}|\theta_v|^2 + \frac{1}{9}(\theta_v^3+\bar{\theta}^3)] + O(\sqrt{\delta})$$
-Note that $\frac{6}{9}|\theta_v|^2+\frac{1}{9}(\theta_v^3+\bar{\theta}^3)= \frac{6}{9}|\theta_v|^2+\frac{2}{9}Re(\theta_v^3) = \frac{6}{9}|\theta_v|^2 + \frac{2}{9}(Re(\theta_v)^3-3Re(\theta_v)Im(\theta_v)^2)\geq 0$ because $|\theta_v|\leq 1$, which means $ Re(\theta_v)^3-3Re(\theta_v)Im(\theta_v)^2\geq -3|\theta_v|^2$. This means that $P[Accept]\leq 8/9+O(\sqrt{\delta})$.
+Note that $\frac{6}{9}|\theta_v|^2+\frac{1}{9}(\theta_v^3+\bar{\theta}^3)= \frac{6}{9}|\theta_v|^2+\frac{2}{9}Re(\theta_v^3) = \frac{6}{9}|\theta_v|^2 + \frac{2}{9}(Re(\theta_v)^3-3Re(\theta_v)Im(\theta_v)^2)\geq 0$ because $|\theta_v|\leq 1$, which means $ Re(\theta_v)^3-3Re(\theta_v)Im(\theta_v)^2\geq -3|\theta_v|^2$. This means that $P[Accept]\leq 8/9+O(\sqrt{\delta})$.\\\\
+\subsection*{Some Takeaways}
+Given the soundness and completeness of this PCP verifier, we can then construct an instance of NAEQ-SAT whose optimal solution is equalled to $P[Accept]$ as before. The two examples above give an idea of the kinds of techniques used to reduce other hardness results to UGC. The types of arguments in these reductions boil down to verifying that functions given by the prover are dictatorship functions, which are functions defined by $f(x) = x_i$ for all $x$. Another component that is present in the verification step is called folding, which is to verify that the functions given by the prover satisfy $f(-x) = -f(x)$. In the first reduction, we see this is explicitly checked by flipping a coin to determine whether to verify the predicate on $f(x)$ or $-f(-x)$. This is to guard against the prover giving something like a constant function that always satisfies the predicate we evaluate. For example, in the case of Max-3-Lin, if we only verified $f_{w_1}(x)f_{w_2}(y)f_{w_3}(z) = 1$ for some inputs $x,y,z$, then the prover could simply give $f_w \equiv 1$ for all $w$ to fool us. The folding step then is required to verify that the function is indeed a dictatorship function, while the predicate being evaluated verifies that the function corresponds to a good labelling of the vertices.
+\printbibliography
+We also used this lecture note from a workshop\\ https://www.fields.utoronto.ca/programs/scientific/11-12/constraint/summerschool/venkat2.pdf
 
 \end{document}
